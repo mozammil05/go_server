@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	// ...
 	"my-auth-app/utils"
 	"net/http"
 	"os"
@@ -13,7 +14,7 @@ import (
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get the JWT secret key from environment variables
-		jwtSecret := os.Getenv("JWT")
+		jwtSecret := os.Getenv("JWT_SECRET")
 
 		// Get the authorization header
 		authHeader := c.Request.Header.Get("Authorization")
@@ -63,7 +64,90 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Set user information in the Gin context
-		c.Set("user", claims.User)
+		c.Set("user", claims)
+		// Set user information in the Gin context for use in route handlers
+		c.Next()
+	}
+}
+
+func UserMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userClaims, exists := c.Get("user")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+			c.Abort()
+			return
+		}
+
+		// Check if the user has the "user" role
+		claims, ok := userClaims.(*utils.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			c.Abort()
+			return
+		}
+
+		if claims.Role != "user" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied. User is not authorized"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+// AdminMiddleware middleware for admin role
+func AdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userClaims, exists := c.Get("user")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+			c.Abort()
+			return
+		}
+
+		// Check if the user has the "admin" role
+		claims, ok := userClaims.(*utils.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			c.Abort()
+			return
+		}
+
+		if claims.Role != "admin" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied. User is not an admin"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+// SuperAdminMiddleware middleware for superadmin role
+func SuperAdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userClaims, exists := c.Get("user")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+			c.Abort()
+			return
+		}
+
+		// Check if the user has the "superadmin" role
+		claims, ok := userClaims.(*utils.Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			c.Abort()
+			return
+		}
+
+		if claims.Role != "superadmin" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied. User is not a superadmin"})
+			c.Abort()
+			return
+		}
 
 		c.Next()
 	}

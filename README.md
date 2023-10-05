@@ -9,16 +9,49 @@
 <!-- go get -u github.com/go-playground/validator/v10 -->
 
 
-├── main.go
-├── routes
-│   └── routes.go
-├── controllers
+my-auth-app/
+│
+├── cmd/
+│   ├── main.go
+│
+├── config/
+│   ├── config.go
+│   ├── env.go
+│
+├── controllers/
+│   ├── auth_controller.go
+│   ├── user_controller.go
+│   ├── admin_controller.go
+│
+├── middleware/
 │   ├── auth.go
-│   └── user.go
-├── models
-│   └── user.go
-├── utils
+│   ├── admin_middleware.go
+│   ├── superadmin_middleware.go
+│
+├── models/
+│   ├── user.go
+│
+├── routes/
+│   ├── auth_routes.go
+│   ├── user_routes.go
+│   ├── admin_routes.go
+│   ├── routes.go
+│
+├── services/
+│   ├── auth_service.go
+│   ├── user_service.go
+│   ├── admin_service.go
+│
+├── utils/
+│   ├── jwt.go
 │   ├── database.go
-│   └── jwt.go
-└── middleware
-    └── auth.go
+│
+├── tests/ (optional)
+│   ├── integration/
+│   ├── unit/
+│
+├── .env
+├── go.mod
+├── go.sum
+└── README.md
+

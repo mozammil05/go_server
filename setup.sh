@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Create the main project directory
-mkdir -p my-auth-app/handlers my-auth-app/models my-auth-app/routes
+mkdir -p my-auth-app/cmd my-auth-app/config my-auth-app/controllers my-auth-app/middleware my-auth-app/models my-auth-app/routes my-auth-app/services my-auth-app/utils my-auth-app/tests/integration my-auth-app/tests/unit my-auth-app/docs
 
 # Create the main.go file
 cat <<EOL > my-auth-app/main.go
@@ -17,74 +17,47 @@ import (
 func main() {
 	port := ":8080"
 	fmt.Printf("Starting server on port %s...\n", port)
-	r := routes.SetupRoutes()
+	r := routes.NewRouter()
 	if err := http.ListenAndServe(port, r); err != nil {
 		log.Fatal(err)
 	}
 }
 EOL
 
-# Create handlers directory and handler files
-mkdir -p my-auth-app/handlers
-cat <<EOL > my-auth-app/handlers/auth_handler.go
-package handlers
+# Create config directory and config files
+mkdir -p my-auth-app/config
+touch my-auth-app/config/config.go my-auth-app/config/env.go
 
-import (
-	"net/http"
-)
+# Create controllers directory and controller files
+mkdir -p my-auth-app/controllers
+touch my-auth-app/controllers/auth_controller.go my-auth-app/controllers/user_controller.go my-auth-app/controllers/admin_controller.go
 
-func SignupHandler(w http.ResponseWriter, r *http.Request) {
-	// Implement your signup handler logic here
-}
-
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	// Implement your login handler logic here
-}
-
-func ChangePasswordHandler(w http.ResponseWriter, r *http.Request) {
-	// Implement your change password handler logic here
-}
-
-func ResetPasswordHandler(w http.ResponseWriter, r *http.Request) {
-	// Implement your reset password handler logic here
-}
-EOL
+# Create middleware directory and middleware files
+mkdir -p my-auth-app/middleware
+touch my-auth-app/middleware/auth.go my-auth-app/middleware/admin_middleware.go my-auth-app/middleware/superadmin_middleware.go
 
 # Create models directory and model files
 mkdir -p my-auth-app/models
-cat <<EOL > my-auth-app/models/user.go
-package models
+touch my-auth-app/models/user.go
 
-type User struct {
-	ID       int    \`json:"id"\`
-	Username string \`json:"username"\`
-	Password string \`json:"password"\`
-}
+# Create routes directory and route files
+mkdir -p my-auth-app/routes
+touch my-auth-app/routes/auth_routes.go my-auth-app/routes/user_routes.go my-auth-app/routes/admin_routes.go my-auth-app/routes/routes.go
 
-// Implement CRUD functions for your user model here
-EOL
+# Create services directory and service files
+mkdir -p my-auth-app/services
+touch my-auth-app/services/auth_service.go my-auth-app/services/user_service.go my-auth-app/services/admin_service.go
 
-# Create routes directory and routes file
-cat <<EOL > my-auth-app/routes/routes.go
-package routes
+# Create utils directory and utility files
+mkdir -p my-auth-app/utils
+touch my-auth-app/utils/jwt.go my-auth-app/utils/database.go
 
-import (
-	"net/http"
-	"github.com/gorilla/mux"
-	"my-auth-app/handlers"
-)
+# Create tests directory and test files
+mkdir -p my-auth-app/tests/integration
+mkdir -p my-auth-app/tests/unit
 
-func SetupRoutes() *mux.Router {
-	r := mux.NewRouter()
-
-	r.HandleFunc("/signup", handlers.SignupHandler).Methods("POST")
-	r.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
-	r.HandleFunc("/changepassword", handlers.ChangePasswordHandler).Methods("POST")
-	r.HandleFunc("/resetpassword", handlers.ResetPasswordHandler).Methods("POST")
-
-	return r
-}
-EOL
+# Create .env file
+touch my-auth-app/.env
 
 # Create go.mod file
 cat <<EOL > my-auth-app/go.mod
@@ -93,10 +66,20 @@ module my-auth-app
 go 1.17
 
 require (
-	github.com/gorilla/mux v1.8.0
-	github.com/go-sql-driver/mysql v1.6.0
-	github.com/dgrijalva/jwt-go v3.2.0
+    github.com/gin-gonic/gin v1.7.4
+    github.com/gorilla/mux v1.8.0
+    github.com/golang-jwt/jwt v1.0.2
 )
 EOL
+
+# Create README.md file
+touch my-auth-app/README.md
+
+# Create docs directory and Swagger-related files
+mkdir -p my-auth-app/docs
+touch my-auth-app/docs/docs.go my-auth-app/docs/swagger.json
+
+# Create swag-init.go file (if needed for Swagger)
+touch my-auth-app/swag-init.go
 
 echo "Authentication project structure and sample files created successfully!"
