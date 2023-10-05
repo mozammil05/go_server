@@ -5,6 +5,8 @@ import (
 	"my-auth-app/middleware"
 	"my-auth-app/utils"
 
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,16 +38,36 @@ func NewRouter(db *utils.Database, jwtSecret string) *gin.Engine {
 		private.Use(middleware.AuthMiddleware())
 		{
 			private.POST("/create-profile", func(c *gin.Context) {
+				// Check if the authenticated user has the "user" role
+				user := c.MustGet("user").(utils.User)
+				if user.Role != "user" {
+					c.JSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
+					return
+				}
 				controllers.CreateUserProfile(c)
 			})
+
 			private.GET("/get-profile", func(c *gin.Context) {
+				// Check if the authenticated user has the "admin" or "superuser" role
+				user := c.MustGet("user").(utils.User)
+				if user.Role != "admin" && user.Role != "superuser" {
+					c.JSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
+					return
+				}
 				controllers.GetAllUsers(c, db)
 			})
 
 			// Route to update user profile
 			private.PUT("/update-profile", func(c *gin.Context) {
+				// Check if the authenticated user has the "user" role
+				user := c.MustGet("user").(utils.User)
+				if user.Role != "user" {
+					c.JSON(http.StatusForbidden, gin.H{"error": "Permission denied"})
+					return
+				}
 				controllers.UpdateUserProfile(c, db)
 			})
+
 			private.POST("/changepassword", func(c *gin.Context) {
 				controllers.ChangePassword(c, db)
 			})

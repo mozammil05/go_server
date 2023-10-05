@@ -62,8 +62,9 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Set user information in the Gin context for use in route handlers
+		// Set user information in the Gin context
 		c.Set("user", claims.User)
+
 		c.Next()
 	}
 }
