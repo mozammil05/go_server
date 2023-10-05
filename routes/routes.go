@@ -32,62 +32,10 @@ func NewRouter(db *utils.Database, jwtSecret string) *gin.Engine {
 		private := apiV1.Group("/private")
 		private.Use(middleware.AuthMiddleware())
 
-		// Routes for regular users
-		userRoutes := private.Group("/user")
-		userRoutes.Use(middleware.UserMiddleware())
-		{
-			userRoutes.POST("/create-profile", func(c *gin.Context) {
-				controllers.CreateUserProfile(c)
-			})
-			userRoutes.GET("/get", func(c *gin.Context) {
-				controllers.GetAllUsers(c, db)
-			})
-
-			userRoutes.PUT("/update-profile", func(c *gin.Context) {
-				controllers.UpdateUserProfile(c, db)
-			})
-			userRoutes.POST("/changepassword", func(c *gin.Context) {
-				controllers.ChangePassword(c, db)
-			})
-		}
-
-		// Routes for admins
-		adminRoutes := private.Group("/admin")
-		adminRoutes.Use(middleware.AdminMiddleware())
-		{
-			adminRoutes.POST("/create-profile", func(c *gin.Context) {
-				controllers.CreateUserProfile(c)
-			})
-			adminRoutes.GET("/get-profile", func(c *gin.Context) {
-				controllers.GetAllUsers(c, db)
-			})
-
-			adminRoutes.PUT("/update-profile", func(c *gin.Context) {
-				controllers.UpdateUserProfile(c, db)
-			})
-			adminRoutes.POST("/changepassword", func(c *gin.Context) {
-				controllers.ChangePassword(c, db)
-			})
-		}
-
-		// Routes for superadmins
-		superadminRoutes := private.Group("/superadmin")
-		superadminRoutes.Use(middleware.SuperAdminMiddleware())
-		{
-			superadminRoutes.POST("/create-profile", func(c *gin.Context) {
-				controllers.CreateUserProfile(c)
-			})
-			superadminRoutes.GET("/get-profile", func(c *gin.Context) {
-				controllers.GetAllUsers(c, db)
-			})
-
-			superadminRoutes.PUT("/update-profile", func(c *gin.Context) {
-				controllers.UpdateUserProfile(c, db)
-			})
-			superadminRoutes.POST("/changepassword", func(c *gin.Context) {
-				controllers.ChangePassword(c, db)
-			})
-		}
+		// Include admin, user, and superadmin routes from separate router files
+		SetupAdminRoutes(private, db)
+		SetupUserRoutes(private, db)
+		SetupSuperAdminRoutes(private, db)
 	}
 
 	return r

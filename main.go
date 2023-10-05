@@ -6,9 +6,19 @@ import (
 	"my-auth-app/routes"
 	"my-auth-app/utils"
 	"os"
+
+	// _ "my-auth-app/docs"
+
 	"github.com/joho/godotenv"
 )
 
+// @title My Auth App API
+// @version 1.0
+// @description This is the API for My Auth App.
+// @host localhost:8080
+// @BasePath /api/v1
+// @schemes http
+// @schemes https
 func main() {
 	// Load environment variables from the .env file
 	if err := godotenv.Load(); err != nil {
@@ -37,6 +47,9 @@ func main() {
 
 	// Create a new router
 	router := routes.NewRouter(db, jwtSecret)
+
+	// Serve Swagger UI
+	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Start your server on the specified port
 	router.Run(":" + port)
