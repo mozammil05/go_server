@@ -1,11 +1,9 @@
 package routes
 
 import (
-	"fmt"
 	"my-auth-app/controllers"
 	"my-auth-app/middleware"
 	"my-auth-app/utils"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,17 +35,17 @@ func NewRouter(db *utils.Database, jwtSecret string) *gin.Engine {
 		private := apiV1.Group("/private")
 		private.Use(middleware.AuthMiddleware())
 		{
-			private.GET("/profile", func(c *gin.Context) {
-				// Call the GetUserProfile function
-				controllers.GetUserProfile(c)
-
-				// Print "hello" after calling GetUserProfile
-				fmt.Println("hello")
-
-				// You can also return a response to the client if needed
-				c.JSON(http.StatusOK, gin.H{"message": "Profile retrieved successfully"})
+			private.POST("/create-profile", func(c *gin.Context) {
+				controllers.CreateUserProfile(c)
 			})
-			private.PUT("/profile", controllers.UpdateUserProfile)
+			private.GET("/get-profile", func(c *gin.Context) {
+				controllers.GetAllUsers(c, db)
+			})
+
+			// Route to update user profile
+			private.PUT("/update-profile", func(c *gin.Context) {
+				controllers.UpdateUserProfile(c, db)
+			})
 			private.POST("/changepassword", func(c *gin.Context) {
 				controllers.ChangePassword(c, db)
 			})

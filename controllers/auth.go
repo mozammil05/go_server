@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"my-auth-app/models"
 	"my-auth-app/utils"
 	"net/http"
@@ -25,18 +24,26 @@ func Signup(c *gin.Context, db *utils.Database) {
 	// Check if the email is already taken
 	existingUser, err := db.UserCollection.FindOne(context.TODO(), bson.M{"email": userInput.Email}).DecodeBytes()
 	if err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+		c.JSON(http.StatusConflict, gin.H{
+			"error":  "Email already exists",
+			"status": http.StatusConflict})
 		return
 	}
 	if existingUser != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+		c.JSON(http.StatusConflict, gin.H{
+			"error":  "Email already exists",
+			"status": http.StatusConflict,
+		})
 		return
 	}
 
 	// Hash the user's password
 	hashedPassword, err := utils.HashPassword(userInput.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to hash password",
+			"status": http.StatusInternalServerError,
+		})
 		return
 	}
 
@@ -50,12 +57,20 @@ func Signup(c *gin.Context, db *utils.Database) {
 	// Insert the user into the database
 	_, err = db.UserCollection.InsertOne(context.TODO(), newUser)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":  "Failed to create user",
+			"status": http.StatusInternalServerError,
+		})
 		return
 	}
 
 	// Return a success message
-	c.JSON(http.StatusOK, gin.H{"message": "User created successfully", "error": false, "data": newUser})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User created successfully",
+		"error":   false,
+		"data":    newUser,
+		"status":  http.StatusOK,
+	})
 
 }
 
@@ -118,6 +133,8 @@ func Login(c *gin.Context, db *utils.Database) {
 		"token_expires_at": expirationTimeFormatted,
 		"token":            token,
 		"data":             userResponse,
+		"status":           http.StatusOK,
+		"error":            false,
 	})
 }
 
@@ -139,10 +156,6 @@ func ChangePassword(c *gin.Context, db *utils.Database) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
-
-	// Debugging: Print existing and input passwords
-	fmt.Println("Existing Password:", existingUser.Password)
-	fmt.Println("Input Old Password:", changePasswordInput.OldPassword)
 
 	// Compare the old password with the input old password
 	if err := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(changePasswordInput.OldPassword)); err != nil {
@@ -170,7 +183,12 @@ func ChangePassword(c *gin.Context, db *utils.Database) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Password changed successfully",
+		"status":  http.StatusOK,
+		"error":   false,
+	})
+
 }
 
 func ResetPassword(c *gin.Context) {
