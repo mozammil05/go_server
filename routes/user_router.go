@@ -15,7 +15,7 @@ func SetupUserRoutes(r *gin.RouterGroup, db *utils.Database) {
 		userRoutes.POST("/create-profile", func(c *gin.Context) {
 			controllers.CreateUserProfile(c)
 		})
-		userRoutes.GET("/get", func(c *gin.Context) {
+		userRoutes.GET("/get-profile", func(c *gin.Context) {
 			controllers.GetAllUsers(c, db)
 		})
 

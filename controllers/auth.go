@@ -99,9 +99,10 @@ func Login(c *gin.Context, db *utils.Database) {
 	}
 
 	// Find the user by email in the database
-	filter := bson.M{"email": userInput.Email}
+	filter := bson.M{"email": userInput.Email, "role": userInput.Role}
 	existingUser := &models.User{}
 	err := db.UserCollection.FindOne(context.TODO(), filter).Decode(existingUser)
+
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return

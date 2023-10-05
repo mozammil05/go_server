@@ -33,8 +33,8 @@ func NewRouter(db *utils.Database, jwtSecret string) *gin.Engine {
 		private.Use(middleware.AuthMiddleware())
 
 		// Include admin, user, and superadmin routes from separate router files
-		SetupAdminRoutes(private, db)
 		SetupUserRoutes(private, db)
+		SetupAdminRoutes(private, db)
 		SetupSuperAdminRoutes(private, db)
 	}
 
