@@ -11,9 +11,6 @@ import (
 func NewRouter(db *utils.Database, jwtSecret string) *gin.Engine {
 	r := gin.Default()
 
-	// Initialize JWT
-	utils.InitJWT(jwtSecret)
-
 	// Create a route group with a custom prefix
 	apiV1 := r.Group("/api/v1")
 	{

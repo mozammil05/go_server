@@ -39,6 +39,7 @@ func CreateUserProfile(c *gin.Context) {
 type UserProfileResponse struct {
 	Email    string `json:"email"`
 	Username string `json:"username"`
+	Role     string `json:"role"`
 }
 
 // GetAllUsers retrieves all users from the database and sends them as a JSON response.
@@ -79,6 +80,7 @@ func GetAllUsers(c *gin.Context, db *utils.Database) {
 		response = append(response, UserProfileResponse{
 			Email:    user.Email,
 			Username: user.Username,
+			Role:     user.Role,
 		})
 	}
 
