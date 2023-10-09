@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"my-auth-app/models"
+	"my-auth-app/services"
 	"my-auth-app/utils"
 	"net/http"
 	"os"
@@ -242,6 +243,55 @@ func ChangePassword(c *gin.Context, db *utils.Database) {
 
 }
 
+
+
+
+// ResetPassword handles the password reset logic
 func ResetPassword(c *gin.Context) {
-	// Implement reset password logic here
+    // Parse the reset token and new password from the request
+    resetToken := c.PostForm("token")
+    // newPassword := c.PostForm("new_password")
+
+    // Call the authentication service to reset the password
+    // err := services.ResetPassword(resetToken, newPassword)
+    // if err != nil {
+    //     c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    //     return
+    // }
+
+    // Retrieve the recipient's email from your database
+    userEmail, err := services.GetUserEmailByResetToken(resetToken)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user email"})
+        return
+    }
+
+    // Construct the reset link
+    resetLink := "https://example.com/reset-password?token=" + resetToken
+
+    // Send the password reset confirmation email
+    err = services.SendResetEmail(userEmail, resetLink)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send reset email"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
 }
+
+
+// // ResetPassword handles the password reset logic
+// func ResetPassword(c *gin.Context) {
+// 	// Parse the reset token and new password from the request
+// 	resetToken := c.PostForm("token")
+// 	newPassword := c.PostForm("new_password")
+
+// 	// Call the SendResetEmail function from the emailServices package
+// 	err := services.SendResetEmail(resetToken, newPassword)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
+// }
