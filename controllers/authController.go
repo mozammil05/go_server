@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"my-auth-app/models"
 	"my-auth-app/utils"
 	"net/http"
@@ -15,11 +16,24 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// signup
 func Signup(c *gin.Context, db *utils.Database) {
 	var userInput models.User
 
-	// Bind user input from the request body
+	customValidator := utils.NewCustomValidator()
+
+	// Bind user input from the request body and validate
 	if err := c.ShouldBindJSON(&userInput); err != nil {
+		// Handle validation errors
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Use the custom validator to further validate the user input
+	if err := customValidator.Validate(userInput); err != nil {
+		fmt.Println(customValidator)
+
+		// Handle custom validation errors with custom error messages
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -51,11 +65,13 @@ func Signup(c *gin.Context, db *utils.Database) {
 	}
 
 	// Create a new user document
-	newUser := models.User{
+	newUser := utils.SignResponse{
 		Email:    userInput.Email,
 		Username: userInput.Username,
 		Password: hashedPassword,
 		Role:     userInput.Role,
+		Created:  userInput.Created,
+		Updated:  userInput.Updated,
 	}
 
 	// Insert the user into the database
@@ -75,15 +91,9 @@ func Signup(c *gin.Context, db *utils.Database) {
 		"data":    newUser,
 		"status":  http.StatusOK,
 	})
-
 }
 
 // Login handles user login and generates a JWT token based on the user's role.
-type UserResponse struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
-}
 
 func Login(c *gin.Context, db *utils.Database) {
 	var userInput models.User
@@ -115,7 +125,7 @@ func Login(c *gin.Context, db *utils.Database) {
 	}
 
 	// Determine the user's role (user, admin, superadmin)
-	userRole := existingUser.Role // You need to define the role property in your User model
+	userRole := existingUser.Role
 
 	// Your JWT secret key
 	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
@@ -127,7 +137,7 @@ func Login(c *gin.Context, db *utils.Database) {
 
 	// Set token expiration time (e.g., 2 hours)
 	istLocation, _ := time.LoadLocation("Asia/Kolkata")
-	expirationTime := time.Now().In(istLocation).Add(2 * time.Hour)
+	expirationTime := time.Now().In(istLocation).Add(20 * time.Hour)
 	claims.ExpiresAt = expirationTime.Unix()
 
 	// Format the expiration time in AM/PM format
@@ -145,7 +155,7 @@ func Login(c *gin.Context, db *utils.Database) {
 	c.Header("Authorization", "Bearer "+tokenString)
 
 	// Create a UserResponse object with the fields you want to include in the response
-	userResponse := UserResponse{
+	userResponse := utils.UserResponse{
 		Email:    existingUser.Email,
 		Username: existingUser.Username,
 		Role:     userRole,
@@ -159,9 +169,26 @@ func Login(c *gin.Context, db *utils.Database) {
 		"data":             userResponse,
 		"status":           http.StatusOK,
 		"error":            false,
+		"is_active":        true,
 	})
+
+	// Update the user document in the database with the new token information
+	update := bson.M{
+		"$set": bson.M{
+			"is_active":  true,
+			"expiration": expirationTime,
+			"tokens":     tokenString, // Replace the existing tokens with the new token string
+		},
+	}
+
+	_, err = db.UserCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		fmt.Println("Failed to update user document:", err)
+	}
+
 }
 
+// change password
 func ChangePassword(c *gin.Context, db *utils.Database) {
 	var changePasswordInput models.ChangePasswordInput
 
