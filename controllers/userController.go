@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"my-auth-app/models"
 	"my-auth-app/utils"
@@ -12,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+// CreateProfile handles the creation of a user profile.
 func CreateUserProfile(c *gin.Context, db *utils.Database) {
 	// Define a variable to hold the user data
 	var userInput models.User
@@ -53,91 +53,6 @@ func CreateUserProfile(c *gin.Context, db *utils.Database) {
 		"data":    insertResult.InsertedID, // Assuming you want to return the inserted document ID
 	})
 }
-
-// func CreateUserProfile(c *gin.Context) {
-// 	// Define a variable to hold the user data
-// 	var userData models.User
-// 	fmt.Println("User data received:", userData)
-
-// 	// Bind the JSON request body to the userData variable
-// 	if err := c.ShouldBindJSON(&userData); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	// Access the uploaded profile picture file
-// 	file, header, err := c.Request.FormFile("profile_picture")
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error reading form file"})
-// 		return
-// 	}
-// 	defer file.Close()
-
-// 	// Generate a unique filename for the profile picture (you can use a UUID or other strategies)
-// 	fileName := "profile" + userData.Username + filepath.Ext(header.Filename)
-
-// 	// Create the target directory if it doesn't exist
-// 	err = os.MkdirAll("profile_pictures", os.ModePerm)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating directory"})
-// 		return
-// 	}
-
-// 	// Call services.UploadFileHandler to handle the file upload
-// 	services.UploadFileHandler(c.Writer, c.Request)
-
-// 	// Implement user profile creation logic here, including storing the file name in the database.
-// 	// Example: You can create a new user profile by inserting the userData and profile picture filename into your database.
-
-// 	// Debugging: Print the userData and the uploaded file name to verify that they're received correctly.
-// 	fmt.Println("User data received:", userData)
-// 	fmt.Println("Profile picture:", fileName)
-
-//		// Send a JSON response to the client.
-//		c.JSON(http.StatusCreated, gin.H{
-//			"message": "User profile created successfully",
-//			"status":  http.StatusCreated,
-//			"error":   false,
-//		})
-//	}
-//
-// CreateProfile handles the creation of a user profile.
-// func CreateUserProfile(c *gin.Context, db *utils.Database) {
-// 	// Define a variable to hold the user data
-// 	var userInput models.User
-
-// 	// Bind the JSON request body to the userInput variable
-// 	if err := c.ShouldBindJSON(&userInput); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	newUser := models.User{
-// 		Email:    userInput.Email,
-// 		Username: userInput.Username,
-// 		Role:     userInput.Role,
-// 		Created:  userInput.Created,
-// 		Updated:  userInput.Updated,
-// 	}
-
-// 	// Insert the user into the database
-// 	insertResult, err := db.UserCollection.InsertOne(context.TODO(), newUser)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{
-// 			"error":  "Failed to create user",
-// 			"status": http.StatusInternalServerError,
-// 		})
-// 		return
-// 	}
-
-// 	// Send a JSON response to the client.
-// 	c.JSON(http.StatusCreated, gin.H{
-// 		"message": "User profile created successfully",
-// 		"status":  http.StatusCreated,
-// 		"error":   false,
-// 		"data":    insertResult.InsertedID, // Assuming you want to return the inserted document ID
-// 	})
-// }
 
 type UserProfileResponse struct {
 	Email    string `json:"email"`
@@ -232,51 +147,3 @@ func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 		"error":   false,
 	})
 }
-
-func UpdateUserProfiles(c *gin.Context, db *utils.Database) {
-	fmt.Println("hhhhh")
-}
-
-// func UpdateUserProfiles(c *gin.Context, db *utils.Database) {
-// 	fmt.Println("hhhhh")
-// 	// Get the user's email from the authentication token
-// 	userEmail := c.GetString("email")
-
-// 	// Check if userEmail is empty
-// 	if userEmail == "" {
-// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User email not found"})
-// 		return
-// 	}
-
-// 	// Bind the updated user profile from the request body
-// 	var updatedUser models.User
-// 	if err := c.ShouldBindJSON(&updatedUser); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	log.Printf("Received user data: %+v", updatedUser)
-
-// 	// Define a filter to find the user by email
-// 	filter := bson.M{"email": userEmail}
-
-// 	// Create an update document
-// 	update := bson.M{
-// 		"$set": bson.M{
-// 			"username": updatedUser.Username,
-// 			// Add other fields you want to update here
-// 		},
-// 	}
-
-// 	// Update the user's profile in the database
-// 	_, err := db.UserCollection.UpdateOne(context.TODO(), filter, update)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user profile"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"message": "User profile updated successfully",
-// 		"status":  http.StatusOK,
-// 		"error":   false,
-// 	})
-// }

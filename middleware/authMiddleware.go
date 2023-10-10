@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
+// AuthMiddleware handles JWT token validation and stores user information in Gin context.
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get the JWT secret key from environment variables
@@ -64,8 +65,12 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Set user information in the Gin context
-		c.Set("user", claims)
-		// Set user information in the Gin context for use in route handlers
+		c.Set("email", claims.Email) // Set email in context
+		c.Set("role", claims.Role)   // Set role in context
+
+		// Continue processing the request
 		c.Next()
 	}
 }
+
+// UserMiddleware checks if the user is authenticated and has the "user" role.

@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	// ...
-	"my-auth-app/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,23 +8,18 @@ import (
 
 func UserMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userClaims, exists := c.Get("user")
-		if !exists {
+		email, existsEmail := c.Get("email")
+		role, existsRole := c.Get("role")
+
+		// Check if both email and role are present in the context
+		if !existsEmail || !existsRole {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 			c.Abort()
 			return
 		}
 
-		// Check if the user has the "user" role
-		claims, ok := userClaims.(*utils.Claims)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
-			c.Abort()
-			return
-		}
-
-		if claims.Role != "user" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied. User is not authorized"})
+		if role.(string) != "user" || email.(string) != "expectedEmail" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied. User is not authorized or has an invalid email"})
 			c.Abort()
 			return
 		}

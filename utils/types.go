@@ -4,12 +4,12 @@ import "time"
 
 // SignResponse represents the response structure for sign operations.
 type SignResponse struct {
-	Email    string    `json:"email"`
-	Username string    `json:"username"`
-	Password string    `json:"password"`
-	Role     string    `json:"role"`
-	Created  time.Time `bson:"created"`
-	Updated  time.Time `bson:"updated"`
+	Email      string    `json:"email"`
+	Username   string    `json:"username"`
+	Password   string    `json:"password"`
+	Role       string    `json:"role"`
+	Created    time.Time `bson:"created"`
+	Updated    time.Time `bson:"updated"`
 }
 
 // User represents user information.
@@ -33,10 +33,4 @@ type Token struct {
 	IsActive   bool      `json:"is_active"`
 	Expiration time.Time `json:"expiration"`
 	Tokens     string    `json:"tokens"`
-}
-
-type UserProfileResponse struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
 }
