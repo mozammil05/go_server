@@ -13,7 +13,7 @@ func SetupSuperAdminRoutes(r *gin.RouterGroup, db *utils.Database) {
 	superadminRoutes.Use(middleware.SuperAdminMiddleware())
 	{
 		superadminRoutes.POST("/create-profile", func(c *gin.Context) {
-			controllers.CreateUserProfile(c)
+			controllers.CreateUserProfile(c,db)
 		})
 		superadminRoutes.GET("/get-profile", func(c *gin.Context) {
 			controllers.GetAllUsers(c, db)

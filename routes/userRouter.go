@@ -13,7 +13,7 @@ func SetupUserRoutes(r *gin.RouterGroup, db *utils.Database) {
 	userRoutes.Use(middleware.UserMiddleware())
 	{
 		userRoutes.POST("/create-profile", func(c *gin.Context) {
-			controllers.CreateUserProfile(c)
+			controllers.CreateUserProfile(c, db)
 		})
 		userRoutes.GET("/get-profile", func(c *gin.Context) {
 			controllers.GetAllUsers(c, db)
