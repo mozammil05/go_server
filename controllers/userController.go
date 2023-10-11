@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"my-auth-app/models"
 	"my-auth-app/utils"
@@ -111,10 +112,13 @@ func GetAllUsers(c *gin.Context, db *utils.Database) {
 
 }
 
-// UpdateUserProfile updates a user's profile
 func UpdateUserProfile(c *gin.Context, db *utils.Database) {
-	// Get the user's email from the request or your authentication method
-	var userData models.User
+	// Get the user's email from the token claims in the context
+	userEmail, exists := c.Get("email")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
 
 	// Bind the updated user profile from the request body
 	var updatedUser models.User
@@ -123,8 +127,12 @@ func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 		return
 	}
 
-	// Define a filter to find the user by email
-	filter := bson.M{"email": userData.Email}
+	// Debugging: Log the received data
+	fmt.Printf("Email from token: %v\n", userEmail)
+	fmt.Printf("Updated user profile: %+v\n", updatedUser)
+
+	// Define a filter to find the user by email (email from the token claims)
+	filter := bson.M{"email": userEmail}
 
 	// Create an update document
 	update := bson.M{
@@ -134,9 +142,16 @@ func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 		},
 	}
 
+	// Debugging: Log the MongoDB update operation
+	fmt.Printf("Update filter: %+v\n", filter)
+	fmt.Printf("Update document: %+v\n", update)
+
 	// Update the user's profile in the database
 	_, err := db.UserCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
+		// Debugging: Log the error
+		fmt.Printf("Update error: %v\n", err)
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user profile"})
 		return
 	}

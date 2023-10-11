@@ -1,8 +1,7 @@
 package middleware
 
 import (
-	// ...
-	"my-auth-app/utils"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -14,9 +13,6 @@ import (
 // AuthMiddleware handles JWT token validation and stores user information in Gin context.
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get the JWT secret key from environment variables
-		jwtSecret := os.Getenv("JWT_SECRET")
-
 		// Get the authorization header
 		authHeader := c.Request.Header.Get("Authorization")
 
@@ -38,9 +34,9 @@ func AuthMiddleware() gin.HandlerFunc {
 		// Get the token string
 		tokenString := parts[1]
 
-		// Parse and validate the token using the secret key
-		token, err := jwt.ParseWithClaims(tokenString, &utils.Claims{}, func(token *jwt.Token) (interface{}, error) {
-			return []byte(jwtSecret), nil
+		// Parse and validate the token
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
 		if err != nil {
@@ -57,20 +53,29 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Get the claims from the token
-		claims, ok := token.Claims.(*utils.Claims)
+		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			c.Abort()
 			return
 		}
 
+		// Get email and role from claims
+		emailClaim, emailExists := claims["email"].(string)
+		roleClaim, roleExists := claims["role"].(string)
+		fmt.Printf("Email: %s, Role: %s\n", emailClaim, roleClaim)
+
+		if !emailExists || !roleExists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			c.Abort()
+			return
+		}
+
 		// Set user information in the Gin context
-		c.Set("email", claims.Email) // Set email in context
-		c.Set("role", claims.Role)   // Set role in context
+		c.Set("email", emailClaim) // Set email in context
+		c.Set("role", roleClaim)   // Set role in context
 
 		// Continue processing the request
 		c.Next()
 	}
 }
-
-// UserMiddleware checks if the user is authenticated and has the "user" role.

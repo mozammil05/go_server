@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,14 +12,14 @@ func UserMiddleware() gin.HandlerFunc {
 		email, existsEmail := c.Get("email")
 		role, existsRole := c.Get("role")
 
-		// Check if both email and role are present in the context
+		fmt.Printf("Role: %+v, Email: %+v\n", role, email)
 		if !existsEmail || !existsRole {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 			c.Abort()
 			return
 		}
 
-		if role.(string) != "user" || email.(string) != "expectedEmail" {
+		if role.(string) != "user" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied. User is not authorized or has an invalid email"})
 			c.Abort()
 			return
