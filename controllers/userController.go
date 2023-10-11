@@ -55,12 +55,6 @@ func CreateUserProfile(c *gin.Context, db *utils.Database) {
 	})
 }
 
-type UserProfileResponse struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
-}
-
 // GetAllUsers retrieves all users from the database and sends them as a JSON response.
 func GetAllUsers(c *gin.Context, db *utils.Database) {
 	// Query all users in the database
@@ -86,17 +80,15 @@ func GetAllUsers(c *gin.Context, db *utils.Database) {
 
 	// Check if there are no users
 	if len(users) == 0 {
-		if len(users) == 0 {
-			c.JSON(http.StatusNotFound, gin.H{"error": "No users found", "status": http.StatusNotFound})
-			return
-		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "No users found", "status": http.StatusNotFound})
 		return
 	}
 
 	// Create a response object without the "password" field for each user
-	var response []UserProfileResponse
+	var response []utils.UserProfileResponse
+
 	for _, user := range users {
-		response = append(response, UserProfileResponse{
+		response = append(response, utils.UserProfileResponse{
 			Email:    user.Email,
 			Username: user.Username,
 			Role:     user.Role,
@@ -109,7 +101,6 @@ func GetAllUsers(c *gin.Context, db *utils.Database) {
 		"message": "Users retrieved successfully",
 		"data":    response,
 	})
-
 }
 
 func UpdateUserProfile(c *gin.Context, db *utils.Database) {
@@ -187,7 +178,7 @@ func GetProfile(c *gin.Context, db *utils.Database) {
 	}
 
 	// Create a response object without the "password" field
-	userProfile := UserProfileResponse{
+	userProfile := utils.UserProfileResponse{
 		Email:    user.Email,
 		Username: user.Username,
 		Role:     user.Role,
