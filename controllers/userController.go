@@ -162,3 +162,42 @@ func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 		"error":   false,
 	})
 }
+
+// GetProfile retrieves the user's profile.
+func GetProfile(c *gin.Context, db *utils.Database) {
+	// Get the user's email from the token claims in the context
+	userEmail, exists := c.Get("email")
+	fmt.Printf("Email:  %s\n", userEmail)
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	// Define a filter to find the user by email
+	filter := bson.M{"email": userEmail}
+
+	// Find the user in the database
+	var user models.User
+	err := db.UserCollection.FindOne(context.TODO(), filter).Decode(&user)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user profile"})
+		return
+	}
+
+	// Create a response object without the "password" field
+	userProfile := UserProfileResponse{
+		Email:    user.Email,
+		Username: user.Username,
+		Role:     user.Role,
+		// Add other profile fields here
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":  http.StatusOK,
+		"error":   false,
+		"data":    userProfile,
+		"message": "User profile retrieved successfully",
+	})
+}

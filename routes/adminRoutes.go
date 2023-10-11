@@ -13,7 +13,10 @@ func SetupAdminRoutes(r *gin.RouterGroup, db *utils.Database) {
 	adminRoutes.Use(middleware.AdminMiddleware())
 	{
 		adminRoutes.POST("/create-profile", func(c *gin.Context) {
-			controllers.CreateUserProfile(c,db)
+			controllers.CreateUserProfile(c, db)
+		})
+		adminRoutes.GET("/get-user-profile", func(c *gin.Context) {
+			controllers.GetProfile(c, db)
 		})
 		adminRoutes.GET("/get-profile", func(c *gin.Context) {
 			controllers.GetAllUsers(c, db)
