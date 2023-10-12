@@ -128,9 +128,9 @@ func Login(c *gin.Context, db *utils.Database) {
 
 	// Create claims with email and role
 	claims := jwt.MapClaims{
-		"email":      userInput.Email,                                        // Add email claim
-		"role":       userRole,                                               // Add role claim
-		"expiration": userInput.Expiration.Format("2006-01-02 03:04 PM MST"), // Add expiration claim
+		"email":      userInput.Email,
+		"role":       userRole,
+		"expiration": userInput.Expiration.Format("2006-01-02 03:04 PM MST"),
 	}
 	// Set token expiration time (e.g., 2 hours)
 	// istLocation, _ := time.LoadLocation("Asia/Kolkata")
