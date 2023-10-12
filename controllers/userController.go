@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"my-auth-app/models"
+	"my-auth-app/services"
 	"my-auth-app/utils"
 	"net/http"
 
@@ -118,31 +119,25 @@ func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 		return
 	}
 
-	// Debugging: Log the received data
-	fmt.Printf("Email from token: %v\n", userEmail)
-	fmt.Printf("Updated user profile: %+v\n", updatedUser)
+	filePath, err := services.HandleUpload(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Printf("File saved to: %s\n", filePath)
 
-	// Define a filter to find the user by email (email from the token claims)
+	// Update the user's profile in the database
 	filter := bson.M{"email": userEmail}
-
-	// Create an update document
 	update := bson.M{
 		"$set": bson.M{
-			"username": updatedUser.Username,
+			"username":     updatedUser.Username,
+			"profileImage": filePath, // Update with the actual file path
 			// Add other fields you want to update here
 		},
 	}
-
-	// Debugging: Log the MongoDB update operation
-	fmt.Printf("Update filter: %+v\n", filter)
-	fmt.Printf("Update document: %+v\n", update)
-
-	// Update the user's profile in the database
-	_, err := db.UserCollection.UpdateOne(context.TODO(), filter, update)
+	fmt.Println(filter)
+	_, err = db.UserCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
-		// Debugging: Log the error
-		fmt.Printf("Update error: %v\n", err)
-
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user profile"})
 		return
 	}

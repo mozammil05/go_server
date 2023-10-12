@@ -3,15 +3,16 @@ package models
 import "time"
 
 type User struct {
-	Email      string    `json:"email" binding:"omitempty"`
-	Username   string    `json:"username"`
-	Password   string    `json:"password"`
-	Role       string    `json:"role"`
-	IsActive   bool      `json:"is_active"`
-	Expiration time.Time `bson:"expiration"`
-	Tokens     string    `bson:"tokens"`
-	Created    time.Time `bson:"created"`
-	Updated    time.Time `bson:"updated"`
+	Email        string    `json:"email" binding:"omitempty"`
+	Username     string    `json:"username"`
+	Password     string    `json:"password"`
+	Role         string    `json:"role"`
+	IsActive     bool      `json:"is_active"`
+	Expiration   time.Time `bson:"expiration"`
+	Tokens       string    `bson:"tokens"`
+	Created      time.Time `bson:"created"`
+	Updated      time.Time `bson:"updated"`
+	ProfileImage string    `json:"profileImage"`
 }
 
 type ChangePasswordInput struct {
