@@ -105,11 +105,6 @@ func GetAllUsers(c *gin.Context, db *utils.Database) {
 	})
 }
 
-type UpdateResponse struct {
-	Username     string `json:"username"`
-	ProfileImage string `json:"profileImage"`
-}
-
 func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 	// Get the user's email from the token claims in the context
 	userEmail, exists := c.Get("email")
@@ -142,7 +137,8 @@ func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 	// Get the username from the form
 	username := c.PostForm("username")
 	// Calculate the relative file path
-	relativeFilePath := "destination/" + filepath.Base(filePath)
+	relativeFilePath := filepath.Base(filePath)
+	// relativeFilePath := "destination/" + filepath.Base(filePath)
 
 	// Update the user's profile in the database
 	filter := bson.M{"email": userEmail}
@@ -162,9 +158,9 @@ func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 	}
 
 	// Set response data
-	responseData := UpdateResponse{
+	responseData := utils.UpdateResponse{
 		Username:     username,
-		ProfileImage: relativeFilePath, // Use the relative file path
+		ProfileImage: relativeFilePath,
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User profile updated successfully",

@@ -22,9 +22,10 @@ type User struct {
 
 // UserResponse represents the user response structure.
 type UserResponse struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	Email      string    `json:"email"`
+	Username   string    `json:"username"`
+	Role       string    `json:"role"`
+	Expiration time.Time `bson:"expiration"`
 }
 
 // Token represents a user's token information.
@@ -35,7 +36,13 @@ type Token struct {
 	Tokens     string    `json:"tokens"`
 }
 type UserProfileResponse struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	Email        string `json:"email"`
+	Username     string `json:"username"`
+	Role         string `json:"role"`
+	ProfileImage string `json:"profileImage"`
+}
+
+type UpdateResponse struct {
+	Username     string `json:"username"`
+	ProfileImage string `json:"profileImage"`
 }

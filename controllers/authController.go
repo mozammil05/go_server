@@ -128,9 +128,16 @@ func Login(c *gin.Context, db *utils.Database) {
 
 	// Create claims with email and role
 	claims := jwt.MapClaims{
-		"email": userInput.Email, // Add email claim
-		"role":  userRole,        // Add role claim
+		"email":      userInput.Email,                                        // Add email claim
+		"role":       userRole,                                               // Add role claim
+		"expiration": userInput.Expiration.Format("2006-01-02 03:04 PM MST"), // Add expiration claim
 	}
+	// Set token expiration time (e.g., 2 hours)
+	// istLocation, _ := time.LoadLocation("Asia/Kolkata")
+	// expirationTime := time.Now().In(istLocation).Add(2 * time.Hour)
+	// claims.Expiration = expirationTime.Unix()
+	// Format the expiration time in AM/PM format with the time zone
+	// expirationTimeFormatted := expirationTime.Format("2006-01-02 03:04 PM MST")
 
 	// Create the JWT token with claims and sign it using the secret key
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -148,9 +155,10 @@ func Login(c *gin.Context, db *utils.Database) {
 
 	// Create a UserResponse object with the fields you want to include in the response
 	userResponse := utils.UserResponse{
-		Email:    existingUser.Email,
-		Username: existingUser.Username,
-		Role:     userRole,
+		Email:      existingUser.Email,
+		Username:   existingUser.Username,
+		Role:       userRole,
+		Expiration: existingUser.Expiration,
 	}
 
 	// Update the user document in the database with the new token information

@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func HandleUpload(c *gin.Context) ([]string, error) {
@@ -33,8 +32,6 @@ func HandleUpload(c *gin.Context) ([]string, error) {
 }
 
 func saveFile(fileHeader *multipart.FileHeader) (string, error) {
-	ext := filepath.Ext(fileHeader.Filename)
-
 	// Specify the destination directory as an absolute path based on the current working directory
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -43,7 +40,7 @@ func saveFile(fileHeader *multipart.FileHeader) (string, error) {
 	fmt.Printf("File currentDir to: %s\n", currentDir)
 
 	// Define the relative destination directory (relative to the current working directory)
-	destinationDir := "destination"
+	destinationDir := "public/images"
 
 	// Ensure the destination directory exists
 	fullDestinationDir := filepath.Join(currentDir, destinationDir)
@@ -53,7 +50,8 @@ func saveFile(fileHeader *multipart.FileHeader) (string, error) {
 		}
 	}
 
-	dstPath := filepath.Join(destinationDir, uuid.New().String()+ext)
+	// Construct the destination file path with the original filename
+	dstPath := filepath.Join(destinationDir, fileHeader.Filename)
 
 	src, err := fileHeader.Open()
 	if err != nil {
