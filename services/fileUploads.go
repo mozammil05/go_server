@@ -1,57 +1,78 @@
+// services/upload.go
 package services
 
 import (
-	"errors"
+	"fmt"
+	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-func HandleUpload(c *gin.Context) (string, error) {
+func HandleUpload(c *gin.Context) ([]string, error) {
 	form, err := c.MultipartForm()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	files := form.File["files"]
-	if len(files) == 0 {
-		return "", errors.New("No files uploaded")
-	}
+	var filePaths []string
 
-	var filePath string
-
-	for key, file := range files {
-		uploadedFilePath, err := saveFile(file, key)
+	for _, file := range files {
+		filePath, err := saveFile(file)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-
-		filePath = uploadedFilePath
+		filePaths = append(filePaths, filePath)
 	}
 
-	return filePath, nil
+	return filePaths, nil
 }
 
-func saveFile(fileHeader *multipart.FileHeader, key int) (string, error) {
-	ext := strings.Split(fileHeader.Filename, ".")
+func saveFile(fileHeader *multipart.FileHeader) (string, error) {
+	ext := filepath.Ext(fileHeader.Filename)
+
+	// Specify the destination directory as an absolute path based on the current working directory
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	fmt.Printf("File currentDir to: %s\n", currentDir)
+
+	// Define the relative destination directory (relative to the current working directory)
+	destinationDir := "destination"
+
+	// Ensure the destination directory exists
+	fullDestinationDir := filepath.Join(currentDir, destinationDir)
+	if _, err := os.Stat(fullDestinationDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(fullDestinationDir, os.ModePerm); err != nil {
+			return "", err
+		}
+	}
+
+	dstPath := filepath.Join(destinationDir, uuid.New().String()+ext)
+
 	src, err := fileHeader.Open()
 	if err != nil {
 		return "", err
 	}
-
 	defer src.Close()
 
-	// Create a new file in the desired destination folder
-	dstPath := filepath.Join("./destination", ext[0]+strconv.Itoa(key)+"."+ext[1])
-	dst, err := os.Create(dstPath)
+	fullDstPath := filepath.Join(currentDir, dstPath)
+
+	dst, err := os.Create(fullDstPath)
 	if err != nil {
 		return "", err
 	}
 	defer dst.Close()
+
+	_, err = io.Copy(dst, src)
+	if err != nil {
+		return "", err
+	}
 
 	return dstPath, nil
 }

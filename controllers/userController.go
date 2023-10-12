@@ -8,6 +8,7 @@ import (
 	"my-auth-app/services"
 	"my-auth-app/utils"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -104,6 +105,11 @@ func GetAllUsers(c *gin.Context, db *utils.Database) {
 	})
 }
 
+type UpdateResponse struct {
+	Username     string `json:"username"`
+	ProfileImage string `json:"profileImage"`
+}
+
 func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 	// Get the user's email from the token claims in the context
 	userEmail, exists := c.Get("email")
@@ -112,40 +118,59 @@ func UpdateUserProfile(c *gin.Context, db *utils.Database) {
 		return
 	}
 
-	// Bind the updated user profile from the request body
-	var updatedUser models.User
-	if err := c.ShouldBindJSON(&updatedUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// Parse form data including username and files
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10 MB limit
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form data"})
 		return
 	}
 
-	filePath, err := services.HandleUpload(c)
+	// Handle file upload
+	filePaths, err := services.HandleUpload(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload the image"})
 		return
 	}
-	fmt.Printf("File saved to: %s\n", filePath)
+
+	// Assuming only one file is uploaded, you can change this logic if multiple files are uploaded
+	if len(filePaths) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No image file provided"})
+		return
+	}
+
+	filePath := filePaths[0] // Using the first file, you can loop through if there are multiple files
+
+	// Get the username from the form
+	username := c.PostForm("username")
+	// Calculate the relative file path
+	relativeFilePath := "destination/" + filepath.Base(filePath)
 
 	// Update the user's profile in the database
 	filter := bson.M{"email": userEmail}
 	update := bson.M{
 		"$set": bson.M{
-			"username":     updatedUser.Username,
-			"profileImage": filePath, // Update with the actual file path
+			"username":     username,
+			"profileImage": relativeFilePath,
 			// Add other fields you want to update here
 		},
 	}
-	fmt.Println(filter)
-	_, err = db.UserCollection.UpdateOne(context.TODO(), filter, update)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user profile"})
+
+	// Perform the database update
+	_, updateErr := db.UserCollection.UpdateOne(context.TODO(), filter, update)
+	if updateErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user profile in the database"})
 		return
 	}
 
+	// Set response data
+	responseData := UpdateResponse{
+		Username:     username,
+		ProfileImage: relativeFilePath, // Use the relative file path
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User profile updated successfully",
 		"status":  http.StatusOK,
 		"error":   false,
+		"data":    responseData,
 	})
 }
 
