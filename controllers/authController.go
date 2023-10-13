@@ -110,7 +110,7 @@ func Login(c *gin.Context, db *utils.Database) {
 	err := db.UserCollection.FindOne(context.TODO(), filter).Decode(existingUser)
 
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Please register an account"})
 		return
 	}
 

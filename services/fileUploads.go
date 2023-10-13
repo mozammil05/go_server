@@ -43,9 +43,9 @@ func saveFile(fileHeader *multipart.FileHeader) (string, error) {
 	destinationDir := "public/images"
 
 	// Ensure the destination directory exists
-	fullDestinationDir := filepath.Join(currentDir, destinationDir)
-	if _, err := os.Stat(fullDestinationDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(fullDestinationDir, os.ModePerm); err != nil {
+	fileDestinationDir := filepath.Join(currentDir, destinationDir)
+	if _, err := os.Stat(fileDestinationDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(fileDestinationDir, os.ModePerm); err != nil {
 			return "", err
 		}
 	}
