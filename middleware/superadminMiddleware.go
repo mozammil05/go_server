@@ -14,7 +14,7 @@ func SuperAdminMiddleware() gin.HandlerFunc {
 		email, existsEmail := c.Get("email")
 		role, existsRole := c.Get("role")
 
-		fmt.Printf("Role: %+v, Email: %+v\n", role, email)
+		fmt.Printf("Roless: %+v, Email: %+v\n", role, email)
 		if !existsEmail || !existsRole {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 			c.Abort()

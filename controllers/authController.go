@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"my-auth-app/models"
 	"my-auth-app/services"
 	"my-auth-app/utils"
@@ -31,8 +30,6 @@ func Signup(c *gin.Context, db *utils.Database) {
 
 	// Use the custom validator to further validate the user input
 	if err := customValidator.Validate(userInput); err != nil {
-		fmt.Println(customValidator)
-
 		// Handle custom validation errors with custom error messages
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -149,10 +146,6 @@ func Login(c *gin.Context, db *utils.Database) {
 
 	// Set the token in the response header
 	c.Header("Authorization", "Bearer "+tokenString)
-
-	// Print email and role for verification
-	fmt.Printf("Email: %s, Role: %s\n", userInput.Email, userRole)
-
 	// Create a UserResponse object with the fields you want to include in the response
 	userResponse := utils.UserResponse{
 		Email:      existingUser.Email,

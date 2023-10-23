@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -63,7 +62,6 @@ func AuthMiddleware() gin.HandlerFunc {
 		// Get email and role from claims
 		emailClaim, emailExists := claims["email"].(string)
 		roleClaim, roleExists := claims["role"].(string)
-		fmt.Printf("Email: %s, Role: %s\n", emailClaim, roleClaim)
 
 		if !emailExists || !roleExists {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
