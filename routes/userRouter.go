@@ -12,6 +12,12 @@ func SetupUserRoutes(r *gin.RouterGroup, db *utils.Database) {
 	userRoutes := r.Group("/user")
 	userRoutes.Use(middleware.UserMiddleware())
 	{
+		// product controller
+		userRoutes.POST("/create-product", func(c *gin.Context) {
+			controllers.CreateUserProducts(c, db)
+		})
+		
+		// user controller
 		userRoutes.POST("/create-profile", func(c *gin.Context) {
 			controllers.CreateUserProfile(c, db)
 		})

@@ -122,6 +122,54 @@
 
 // utils/database.go
 
+// package utils
+
+// import (
+// 	"context"
+
+// 	"go.mongodb.org/mongo-driver/mongo"
+// 	"go.mongodb.org/mongo-driver/mongo/options"
+// )
+
+// var (
+// 	mongoURI           = "mongodb://localhost:27017"
+// 	databaseName       = "yourapp"
+// 	userCollectionName = "users"
+// )
+
+// type Database struct {
+// 	Client         *mongo.Client
+// 	UserCollection *mongo.Collection
+// }
+
+// func InitDB() *Database {
+// 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	ctx := context.TODO()
+
+// 	err = client.Connect(ctx)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	db := &Database{
+// 		Client:         client,
+// 		UserCollection: client.Database(databaseName).Collection(userCollectionName),
+// 	}
+
+// 	return db
+// }
+
+// func (db *Database) Disconnect() {
+// 	err := db.Client.Disconnect(context.TODO())
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// }
+
 package utils
 
 import (
@@ -132,14 +180,18 @@ import (
 )
 
 var (
-	mongoURI           = "mongodb://localhost:27017"
-	databaseName       = "yourapp"
-	userCollectionName = "users"
+	mongoURI          = "mongodb://localhost:27017"
+	databaseName      = "yourapp"
+	userCollection    = "users"
+	productCollection = "products" // Add your collection names
+	// Add more collection names as needed
 )
 
 type Database struct {
-	Client         *mongo.Client
-	UserCollection *mongo.Collection
+	Client            *mongo.Client
+	UserCollection    *mongo.Collection
+	ProductCollection *mongo.Collection // Add more collection fields as needed
+	// Add additional collection fields here
 }
 
 func InitDB() *Database {
@@ -156,8 +208,10 @@ func InitDB() *Database {
 	}
 
 	db := &Database{
-		Client:         client,
-		UserCollection: client.Database(databaseName).Collection(userCollectionName),
+		Client:            client,
+		UserCollection:    client.Database(databaseName).Collection(userCollection),
+		ProductCollection: client.Database(databaseName).Collection(productCollection),
+		// Assign more collections as needed
 	}
 
 	return db
